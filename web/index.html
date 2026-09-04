@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>نسخ القرآن — سورة الفاتحة</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; height: 100%; background: #fff8e1; font-family: sans-serif; }
+    body { display: flex; flex-direction: column; }
+    h1 { margin: 12px 0 8px; text-align: center; font-size: 18px; color: #3e2723; }
+    .stage { position: relative; flex: 1; margin: 0 10px; background: #fff; border-radius: 10px; overflow: hidden; touch-action: none; }
+    .stage img, .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .stage img { opacity: 0.32; object-fit: contain; pointer-events: none; }
+    .bar { display: flex; align-items: center; justify-content: space-around; padding: 12px 10px 18px; }
+    button { background: #2e7d32; color: #fff; border: 0; border-radius: 8px; padding: 10px 22px; font-size: 16px; font-weight: 700; }
+    .score { font-size: 18px; font-weight: 700; color: #3e2723; }
+  </style>
+</head>
+<body>
+  <h1>سورة الفاتحة — نسخ بالقلم</h1>
+  <div class="stage" id="stage">
+    <img alt="مصحف المدينة" src="https://raw.githubusercontent.com/quranpedia/quran-svg/main/mushafs/hafs/kfqc/svg/001.svg" />
+    <canvas id="c"></canvas>
+  </div>
+  <div class="bar">
+    <button id="eval">قيّم</button>
+    <button id="clear">مسح</button>
+    <div class="score">الدرجة: <span id="score">0</span>%</div>
+  </div>
+  <script>
+    const stage = document.getElementById('stage');
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+    let drawing = false, points = 0;
+    function resize() {
+      const r = stage.getBoundingClientRect();
+      canvas.width = r.width * devicePixelRatio;
+      canvas.height = r.height * devicePixelRatio;
+      canvas.style.width = r.width + 'px';
+      canvas.style.height = r.height + 'px';
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#1a4d8c'; ctx.lineWidth = 3;
+    }
+    resize(); addEventListener('resize', resize);
+    function pos(e) {
+      const t = e.touches ? e.touches[0] : e;
+      const r = canvas.getBoundingClientRect();
+      return { x: t.clientX - r.left, y: t.clientY - r.top };
+    }
+    function start(e) { e.preventDefault(); drawing = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+    function move(e) { if (!drawing) return; e.preventDefault(); const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); points++; }
+    function end() { drawing = false; }
+    canvas.addEventListener('pointerdown', start);
+    canvas.addEventListener('pointermove', move);
+    canvas.addEventListener('pointerup', end);
+    canvas.addEventListener('pointercancel', end);
+    document.getElementById('clear').onclick = () => { ctx.clearRect(0,0,canvas.width,canvas.height); points = 0; document.getElementById('score').textContent = '0'; };
+    document.getElementById('eval').onclick = () => { document.getElementById('score').textContent = String(Math.min(100, Math.round((points / 160) * 100))); };
+  </script>
+</body>
+</html>
